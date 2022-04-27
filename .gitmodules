@@ -1,0 +1,3 @@
+[submodule "library/myutils"]
+	path = library/myutils
+	url = https://github.com/tranndt/myutils.git
