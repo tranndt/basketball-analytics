@@ -1,4 +1,14 @@
+import sys
+sys.path.insert(0,"../../")
 
+from library import *
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import requests
+from bs4 import *
+from bs4.element import PageElement
 
 TEAM_CODE = {
 'Atlanta Hawks':'ATL',
@@ -32,3 +42,17 @@ TEAM_CODE = {
  'Utah Jazz':'UTA',
  'Washington Wizards':'WAS'
 }
+
+def new_session(headers=None):
+    session = requests.Session()
+    if headers:
+        session.headers.update(headers)
+    return session
+
+def get_url(url):
+    content = new_session().get(url).text
+    return content
+
+def strip_html_comment(string): 
+    import re
+    return re.sub("<!--|-->","",string)
