@@ -1,3 +1,7 @@
 */__pycache__
 *.pyc
 data/21-22
+.history
+.vscode
+__backup__
+code/v3/basketball-reference.com
