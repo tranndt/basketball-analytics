@@ -1,0 +1,178 @@
+# 1:
+#   experiment_type: rfecv
+#   parameters:
+#     name: 
+#     save_to: ./experiments
+#     datasets:
+#       - prior_last10_stats_net
+#       - prior_cumu_stats_net
+#       - prior_cumu_stats_rankings_net
+#       - prior_cumu_win_records_net
+#       - prior_scheduling
+#     combine: True
+#     label: facts_boxscores_win_result
+#     models:
+#       - LogisticRegression
+#       - RidgeClassifier
+#       # - RandomForestClassifier
+#       # - SVC
+#       # - GradientBoostingClassifier   
+#     scorer:
+#       - accuracy
+#       - balanced_accuracy 
+#     save_best_model: False
+#     cv: 3
+#     min_features_thresholds: [0.2,0.4,0.6,0.8,1.0]
+
+# 2:
+#   experiment_type: rfecv
+#   parameters:
+#     name: 
+#     save_to: ./experiments
+#     datasets:
+#       - prior_last10_stats_net
+#       - prior_cumu_stats_net
+#       - prior_cumu_stats_rankings_net
+#       - prior_cumu_win_records_net
+#       - prior_scheduling
+#     combine: True
+#     label: facts_boxscores_net_pts
+#     models:
+#       - LinearRegression
+#       - Ridge
+#       # - RandomForestRegressor
+#       # - SVR
+#       # - GradientBoostingRegressor
+#     scorer:
+#       - r2
+#       - neg_mean_absolute_error 
+#       - neg_root_mean_squared_error
+#     save_best_model: False
+#     cv: 3
+#     min_features_thresholds: [0.2,0.4,0.6,0.8,1.0]
+
+# 3:
+#   experiment_type: rfecv
+#   parameters:
+#     name: 
+#     save_to: ./experiments
+#     datasets:
+#       - prior_last10_stats_avg
+#       - prior_cumu_stats_avg
+#       - prior_cumu_stats_rankings_avg
+#       - prior_cumu_win_records_avg
+#       - prior_scheduling
+#     combine: True
+#     label: facts_boxscores_total_pts
+#     models:
+#       - LinearRegression
+#       - Ridge
+#       # - RandomForestRegressor
+#       # - SVR
+#       # - GradientBoostingRegressor
+#     scorer:
+#       - r2
+#       - neg_mean_absolute_error 
+#       - neg_root_mean_squared_error
+#     save_best_model: False
+#     cv: 3
+#     min_features_thresholds: [0.2,0.4,0.6,0.8,1.0]
+
+
+
+# 4:
+#   experiment_type: select_percentile
+#   parameters:
+#     name: 
+#     save_to: ./experiments
+#     save_best_model: False
+#     datasets:
+#       - prior_last10_stats_net
+#       - prior_cumu_stats_net
+#       - prior_cumu_stats_rankings_net
+#       - prior_cumu_win_records_net
+#       - prior_scheduling
+#     combine: True
+#     label: facts_boxscores_win_result
+#     models:
+#       - LogisticRegression
+#       - RidgeClassifier
+#       # - RandomForestClassifier
+#       # - SVC
+#       # - GradientBoostingClassifier   
+#     scorer:
+#       - accuracy
+#       - balanced_accuracy 
+#     fs_scorer:
+#       # - chi2 # Only non negative
+#       - f_classif
+#       - mutual_info_classif
+
+#     fs_thresholds: [20,40,60,80,100]
+
+# 5:
+#   experiment_type: select_percentile
+#   parameters:
+#     name: 
+#     save_to: ./experiments
+#     save_best_model: False
+#     datasets:
+#       - prior_last10_stats_net
+#       - prior_cumu_stats_net
+#       - prior_cumu_stats_rankings_net
+#       - prior_cumu_win_records_net
+#       - prior_scheduling
+#     combine: True
+#     label: facts_boxscores_net_pts
+#     models:
+#       - LinearRegression
+#       - Ridge
+#       # - RandomForestRegressor
+#       # - SVR
+#       # - GradientBoostingRegressor
+#     scorer:
+#       - r2
+#       - neg_mean_absolute_error 
+#       - neg_root_mean_squared_error
+#     fs_scorer:
+#       - r_regression
+#       - f_regression 
+#       - mutual_info_regression
+#     fs_thresholds: [20,40,60,80,100]
+
+
+
+
+6:
+  experiment_type: select_percentile
+  parameters:
+    name: 
+    save_to: ./experiments
+    save_best_model: False
+    datasets:
+      - prior_last10_stats_avg
+      - prior_cumu_stats_avg
+      - prior_cumu_stats_rankings_avg
+      - prior_cumu_win_records_avg
+      - prior_last10_stats_net
+      - prior_cumu_stats_net
+      - prior_cumu_stats_rankings_net
+      - prior_cumu_win_records_net
+      - prior_scheduling
+    combine: True
+    label: facts_boxscores_total_pts
+    models:
+      - LinearRegression
+      - Ridge
+      # - RandomForestRegressor
+      # - SVR
+      # - GradientBoostingRegressor
+    scorer:      
+      - r2
+      - neg_mean_absolute_error 
+      - neg_root_mean_squared_error
+    fs_scorer:
+      - r_regression
+      - f_regression 
+      - mutual_info_regression
+    fs_thresholds: [20,40,60,80,100]
