@@ -6,3 +6,8 @@ data/21-22
 __backup__
 code/v3/basketball-reference.com
 code/v4/experiments
+code/v5/data
+code/v5/dev/03_basketball_reference/demo2
+code/v5/dev/03_basketball_reference/demo
+Volumes/*
+*.DS_Store
