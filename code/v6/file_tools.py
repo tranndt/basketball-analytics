@@ -24,6 +24,9 @@ def get_all_files(directory, file_type=None):
     else:
         return files
     
+def get_all_files_recursive(directory, file_type = None):
+    return sorted([os.path.join(root, file) for root, dirs, files in os.walk(directory) for file in files if not file_type or file.endswith(file_type)])
+
 # Get all folders within a directory
 def get_all_folders(directory):
     root, dirs, files = list(os.walk(directory))[0]

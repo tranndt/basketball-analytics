@@ -13,3 +13,4 @@ Volumes/*
 *.DS_Store
 code/v6/data-html
 code/v6/data-parsed
+code/v6/data-computed
