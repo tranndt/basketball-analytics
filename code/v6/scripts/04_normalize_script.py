@@ -22,7 +22,7 @@ MODE = args.mode
 def normalize_gamelogs_stats_regular_season():
     """
     Description:
-        Normalize gamelog stats
+        Normalize gamelog stats relative to the current season, organized by round
     Summary:
 
     Usage:
@@ -30,53 +30,54 @@ def normalize_gamelogs_stats_regular_season():
     
     """
     # Load list of league seasons
-    all_league_seasons_html_dict = {}
+    LG_SS_HTML_DICT = {}
     if file_exists(f'{SRC_DIR}/league_seasons_html.txt'):
-        all_league_seasons_html_dict = load_file(f'{SRC_DIR}/league_seasons_html.txt')
-        all_league_seasons_html_dict = ast.literal_eval(all_league_seasons_html_dict)
+        LG_SS_HTML_DICT_STR = load_file(f'{SRC_DIR}/league_seasons_html.txt')
+        LG_SS_HTML_DICT = ast.literal_eval(LG_SS_HTML_DICT_STR)
     else:
         print('league_seasons_html.txt not found. Please scrape it first.')
         return
 
     # For every league_season, get all team_seasons belonging to the league
-    for league, LEAG_TM_SS_HTML_LIST in list(all_league_seasons_html_dict.items()):
+    for LG_SS_HTML, LG_TM_HTML_LIST in list(LG_SS_HTML_DICT.items()):
+        LG_SS_DIR = parse_league_id(LG_SS_HTML)['body']
         # For each stats type
         for TGL_STATS_TYPE in [ 'tgl_basic/stats_expd_avg','tgl_basic/stats_roll_05_avg','tgl_basic/stats_roll_10_avg',
                                     'tgl_basic/stats_roll_15_avg', 'tgl_basic/stats_roll_20_avg',
                                     'tgl_advanced/stats_expd_avg','tgl_advanced/stats_roll_05_avg','tgl_advanced/stats_roll_10_avg',
                                     'tgl_advanced/stats_roll_15_avg', 'tgl_advanced/stats_roll_20_avg']:
             # Get the corresponding season gamelogs stats for each team belonging to the league
-            LEAG_TGL_STATS_PER_TM_SS_LIST = []
-            for TM_SS_HTML_ID in LEAG_TM_SS_HTML_LIST:
-                TM_SS_DIR = parse_team_html_id(TM_SS_HTML_ID)['body']
+            LG_TGL_STATS_PER_TM_LIST = []
+            for TM_SS_HTML_ID in LG_TM_HTML_LIST:
+                TM_SS_DIR = parse_team_season_id(TM_SS_HTML_ID)['body']
                 TGL_STATS_DF = pd.read_csv(f'{SRC_DIR}/{TM_SS_DIR}/{TGL_STATS_TYPE}.csv',header=[0,1])
                 TGL_STATS_DF.insert(0,'Team_id',TM_SS_HTML_ID)
-                LEAG_TGL_STATS_PER_TM_SS_LIST.append(TGL_STATS_DF)
+                LG_TGL_STATS_PER_TM_LIST.append(TGL_STATS_DF)
 
             # Create a table for each round in the league season
-            for RD_INDEX in range(len(LEAG_TGL_STATS_PER_TM_SS_LIST[0])):
-                LEAG_TGL_STATS_PER_RD_DF = []
-                for TGL_STATS_TM in LEAG_TGL_STATS_PER_TM_SS_LIST:
+            make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/raw')
+            make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_minmax')
+            make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_standard')
+            make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_robust')
+            make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_ranking')
+            for RD_INDEX in range(len(LG_TGL_STATS_PER_TM_LIST[0])):
+                LG_TGL_STATS_PER_RD_DF = []
+                for TGL_STATS_TM in LG_TGL_STATS_PER_TM_LIST:
                     if RD_INDEX >= len(TGL_STATS_TM):
                         continue
-                    LEAG_TGL_STATS_PER_RD_DF.append(TGL_STATS_TM.iloc[RD_INDEX])
-                LEAG_TGL_STATS_PER_RD_DF = pd.concat(LEAG_TGL_STATS_PER_RD_DF,axis=1).T.set_index('Team_id',append=True)
-                LEAG_TGL_STATS_PER_RD_NORM_MNMX_DF  = __normalize_league_gamelogs_stats_minmax__(LEAG_TGL_STATS_PER_RD_DF)
-                LEAG_TGL_STATS_PER_RD_NORM_STD_DF   = __normalize_league_gamelogs_stats_standard__(LEAG_TGL_STATS_PER_RD_DF)
-                LEAG_TGL_STATS_PER_RD_NORM_RBST_DF  = __normalize_league_gamelogs_stats_robust__(LEAG_TGL_STATS_PER_RD_DF)
-                LEAG_TGL_STATS_PER_RD_NORM_RANK_DF  = __normalize_league_gamelogs_stats_ranking__(LEAG_TGL_STATS_PER_RD_DF)
+                    LG_TGL_STATS_PER_RD_DF.append(TGL_STATS_TM.iloc[RD_INDEX])
+                LG_TGL_STATS_PER_RD_DF = pd.concat(LG_TGL_STATS_PER_RD_DF,axis=1).T.set_index('Team_id',append=True)
+                LG_TGL_STATS_PER_RD_NORM_MNMX_DF  = __normalize_league_gamelogs_stats_minmax__(LG_TGL_STATS_PER_RD_DF)
+                LG_TGL_STATS_PER_RD_NORM_STD_DF   = __normalize_league_gamelogs_stats_standard__(LG_TGL_STATS_PER_RD_DF)
+                LG_TGL_STATS_PER_RD_NORM_RBST_DF  = __normalize_league_gamelogs_stats_robust__(LG_TGL_STATS_PER_RD_DF)
+                LG_TGL_STATS_PER_RD_NORM_RANK_DF  = __normalize_league_gamelogs_stats_ranking__(LG_TGL_STATS_PER_RD_DF)
 
                 # Save each df
-                make_directory(f'{TGT_DIR}/{league}/{TGL_STATS_TYPE}/raw')
-                make_directory(f'{TGT_DIR}/{league}/{TGL_STATS_TYPE}/norm_minmax')
-                make_directory(f'{TGT_DIR}/{league}/{TGL_STATS_TYPE}/norm_standard')
-                make_directory(f'{TGT_DIR}/{league}/{TGL_STATS_TYPE}/norm_robust')
-                make_directory(f'{TGT_DIR}/{league}/{TGL_STATS_TYPE}/norm_ranking')
-                LEAG_TGL_STATS_PER_RD_DF.to_csv(f'{TGT_DIR}/{league}/{TGL_STATS_TYPE}/raw/{RD_INDEX}.csv')
-                LEAG_TGL_STATS_PER_RD_NORM_MNMX_DF.to_csv(f'{TGT_DIR}/{league}/{TGL_STATS_TYPE}/norm_minmax/{RD_INDEX}.csv')
-                LEAG_TGL_STATS_PER_RD_NORM_STD_DF.to_csv(f'{TGT_DIR}/{league}/{TGL_STATS_TYPE}/norm_standard/{RD_INDEX}.csv')
-                LEAG_TGL_STATS_PER_RD_NORM_RBST_DF.to_csv(f'{TGT_DIR}/{league}/{TGL_STATS_TYPE}/norm_robust/{RD_INDEX}.csv')
-                LEAG_TGL_STATS_PER_RD_NORM_RANK_DF.to_csv(f'{TGT_DIR}/{league}/{TGL_STATS_TYPE}/norm_ranking/{RD_INDEX}.csv')
+                LG_TGL_STATS_PER_RD_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/raw/{RD_INDEX}.csv')
+                LG_TGL_STATS_PER_RD_NORM_MNMX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_minmax/{RD_INDEX}.csv')
+                LG_TGL_STATS_PER_RD_NORM_STD_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_standard/{RD_INDEX}.csv')
+                LG_TGL_STATS_PER_RD_NORM_RBST_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_robust/{RD_INDEX}.csv')
+                LG_TGL_STATS_PER_RD_NORM_RANK_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_ranking/{RD_INDEX}.csv')
 
 
 def __normalize_league_gamelogs_stats_minmax__(df):
@@ -85,6 +86,7 @@ def __normalize_league_gamelogs_stats_minmax__(df):
     df_norm = df.copy()
     df_norm.loc[:,:] = scaler.fit_transform(df_norm)
     return df_norm
+
 def __normalize_league_gamelogs_stats_standard__(df):
     from sklearn.preprocessing import StandardScaler
     scaler = StandardScaler()

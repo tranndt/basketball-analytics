@@ -225,7 +225,7 @@ def parse_all_team_gamelogs_tables_from_file(file_name):
     html_text = clean_html_text(html_text)
     return parse_all_team_gamelogs_tables(html_text)
 
-def parse_team_html_id(html_dir):
+def parse_team_season_id(html_dir):
     # Check to see if the pattern starts with keywords 'teams','boxscores','players','leagues'
     # If not, return None
     if not re.match(r'(.*)/teams/(.*)/(.*)',html_dir):
@@ -238,3 +238,18 @@ def parse_team_html_id(html_dir):
         'body': match.group(2),
         'foot': match.group(5),
     }
+
+def parse_league_id(html_dir):
+    # Check to see if the pattern starts with keywords 'teams','boxscores','players','leagues'
+    # If not, return None
+    if not re.match(r'(.*)/leagues/(.*)(.*)',html_dir):
+        return None
+    # Otherwise, parse the directory
+    pattern = r'(.*)(/leagues/([A-Z]{3})_([0-9]{4}))(.*)'
+    match = re.match(pattern,html_dir)
+    return {
+        'head': match.group(1),
+        'body': match.group(2),
+        'foot': match.group(5),
+    }
+

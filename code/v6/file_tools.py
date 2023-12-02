@@ -20,9 +20,9 @@ def load_file(file_name):
 def get_all_files(directory, file_type=None):
     root, dirs, files = list(os.walk(directory))[0]
     if file_type:
-        return [file for file in files if file.endswith(file_type)]
+        return sorted([file for file in files if file.endswith(file_type)])
     else:
-        return files
+        return sorted(files)
     
 def get_all_files_recursive(directory, file_type = None):
     return sorted([os.path.join(root, file) for root, dirs, files in os.walk(directory) for file in files if not file_type or file.endswith(file_type)])
