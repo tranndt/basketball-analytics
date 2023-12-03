@@ -35,7 +35,7 @@ def __compute_rolling_avg_stats__(df, window=5):
 def __compute_rolling_std_stats__(df, window=5):
     return df.rolling(window).std()
 
-def __compute_pts_total__(df, window=5):
+def __compute_pts_total__(df):
     return df.sum(axis=1)
 
 def __compute_pts_spread__(df):
@@ -114,10 +114,7 @@ def compute_gamelog_stats_regular_season():
                 'stats_roll_20_avg': TGL_STATS_ROLL_20_AVG_DF,
                 'stats_roll_20_std': TGL_STATS_ROLL_20_STD_DF
             }
-            # remove the root from the directory
             # Extract the team and season from the directory
-
-
             TGL_STATS_DIR = SRC_TGL_CSV.replace(SRC_DIR,'').replace('.csv','')
             make_directory(f'{TGT_DIR}/{TGL_STATS_DIR}')
             for TBL_ID, DF in TGL_DICT.items():

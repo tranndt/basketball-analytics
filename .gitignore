@@ -16,4 +16,6 @@ code/v6/data-parsed
 code/v6/data-computed
 code/v6/data-normalized
 code/v6/data-indexed
+code/v6/data-aggregated
+code/v6/data*
 

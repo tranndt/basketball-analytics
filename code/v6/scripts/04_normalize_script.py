@@ -7,11 +7,15 @@ import time
 from tqdm import tqdm
 import argparse
 
+# Filter Runtime Warnings
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
 parser = argparse.ArgumentParser(description='Normalize basketball-reference.com data')
 parser.add_argument('-d', '--debug', action='store_true', help='Debug mode')
-parser.add_argument('-s', '--sourcedir', type=str, default='../data/', help='Source directory')
-parser.add_argument('-t', '--targetdir', type=str, default='../data-parsed/', help='Target directory')
-parser.add_argument('-m', '--mode', type=str, default='norm_gamelogs_stats', help='')
+parser.add_argument('-s', '--sourcedir', type=str, default='../data-aggregated/', help='Source directory')
+parser.add_argument('-t', '--targetdir', type=str, default='../data-normalized/', help='Target directory')
+parser.add_argument('-m', '--mode', type=str, default='all', help='')
 
 args = parser.parse_args()
 debug = args.debug
@@ -26,7 +30,7 @@ def normalize_gamelogs_stats_regular_season():
     Summary:
 
     Usage:
-        python3 04_normalize_script.py -m norm_gamelogs_stats -s ../data-computed/ -t ../data-normalized/
+        python3 04_normalize_script.py -s ../data-aggregated/ -t ../data-normalized/
     
     """
     # Load list of league seasons
@@ -39,13 +43,27 @@ def normalize_gamelogs_stats_regular_season():
         return
 
     # For every league_season, get all team_seasons belonging to the league
-    for LG_SS_HTML, LG_TM_HTML_LIST in list(LG_SS_HTML_DICT.items()):
+    TQDM_LG_SS_HTML_DICT = tqdm(LG_SS_HTML_DICT.items(),position=0, leave=True)
+    for LG_SS_HTML, LG_TM_HTML_LIST in TQDM_LG_SS_HTML_DICT:
+        TQDM_LG_SS_HTML_DICT.set_description(f'{LG_SS_HTML}')
         LG_SS_DIR = parse_league_id(LG_SS_HTML)['body']
         # For each stats type
-        for TGL_STATS_TYPE in [ 'tgl_basic/stats_expd_avg','tgl_basic/stats_roll_05_avg','tgl_basic/stats_roll_10_avg',
-                                    'tgl_basic/stats_roll_15_avg', 'tgl_basic/stats_roll_20_avg',
-                                    'tgl_advanced/stats_expd_avg','tgl_advanced/stats_roll_05_avg','tgl_advanced/stats_roll_10_avg',
-                                    'tgl_advanced/stats_roll_15_avg', 'tgl_advanced/stats_roll_20_avg']:
+        for TGL_STATS_TYPE in [ 
+            'tgl_basic/stats_cumu_avg', 'tgl_basic/stats_roll_04_avg','tgl_basic/stats_roll_08_avg', 
+            'tgl_basic/stats_roll_12_avg', 'tgl_basic/stats_roll_16_avg', 'tgl_basic/stats_roll_20_avg',
+            'tgl_basic/stats_hm_cumu_avg', 'tgl_basic/stats_hm_roll_04_avg','tgl_basic/stats_hm_roll_08_avg',
+            'tgl_basic/stats_hm_roll_12_avg', 'tgl_basic/stats_hm_roll_16_avg', 'tgl_basic/stats_hm_roll_20_avg',
+            'tgl_basic/stats_aw_cumu_avg',  'tgl_basic/stats_aw_roll_04_avg','tgl_basic/stats_aw_roll_08_avg',
+            'tgl_basic/stats_aw_roll_12_avg', 'tgl_basic/stats_aw_roll_16_avg', 'tgl_basic/stats_aw_roll_20_avg',
+            # 'tgl_basic/stats_h2h_cumu_avg',
+            'tgl_advanced/stats_cumu_avg', 'tgl_advanced/stats_roll_04_avg','tgl_advanced/stats_roll_08_avg',
+            'tgl_advanced/stats_roll_12_avg', 'tgl_advanced/stats_roll_16_avg', 'tgl_advanced/stats_roll_20_avg',
+            'tgl_advanced/stats_hm_cumu_avg', 'tgl_advanced/stats_hm_roll_04_avg','tgl_advanced/stats_hm_roll_08_avg',
+            'tgl_advanced/stats_hm_roll_12_avg', 'tgl_advanced/stats_hm_roll_16_avg', 'tgl_advanced/stats_hm_roll_20_avg',
+            'tgl_advanced/stats_aw_cumu_avg',  'tgl_advanced/stats_aw_roll_04_avg','tgl_advanced/stats_aw_roll_08_avg',
+            'tgl_advanced/stats_aw_roll_12_avg', 'tgl_advanced/stats_aw_roll_16_avg', 'tgl_advanced/stats_aw_roll_20_avg',
+            # 'tgl_advanced/stats_h2h_cumu_avg',
+        ]:
             # Get the corresponding season gamelogs stats for each team belonging to the league
             LG_TGL_STATS_PER_TM_LIST = []
             for TM_SS_HTML_ID in LG_TM_HTML_LIST:
@@ -55,7 +73,7 @@ def normalize_gamelogs_stats_regular_season():
                 LG_TGL_STATS_PER_TM_LIST.append(TGL_STATS_DF)
 
             # Create a table for each round in the league season
-            make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/raw')
+            make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/unnorm')
             make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_minmax')
             make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_standard')
             make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_robust')
@@ -73,11 +91,12 @@ def normalize_gamelogs_stats_regular_season():
                 LG_TGL_STATS_PER_RD_NORM_RANK_DF  = __normalize_league_gamelogs_stats_ranking__(LG_TGL_STATS_PER_RD_DF)
 
                 # Save each df
-                LG_TGL_STATS_PER_RD_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/raw/{RD_INDEX}.csv')
-                LG_TGL_STATS_PER_RD_NORM_MNMX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_minmax/{RD_INDEX}.csv')
-                LG_TGL_STATS_PER_RD_NORM_STD_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_standard/{RD_INDEX}.csv')
-                LG_TGL_STATS_PER_RD_NORM_RBST_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_robust/{RD_INDEX}.csv')
-                LG_TGL_STATS_PER_RD_NORM_RANK_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_ranking/{RD_INDEX}.csv')
+                RD_NM = f'{RD_INDEX:02d}'
+                LG_TGL_STATS_PER_RD_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/unnorm/{RD_NM}.csv')
+                LG_TGL_STATS_PER_RD_NORM_MNMX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_minmax/{RD_NM}.csv')
+                LG_TGL_STATS_PER_RD_NORM_STD_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_standard/{RD_NM}.csv')
+                LG_TGL_STATS_PER_RD_NORM_RBST_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_robust/{RD_NM}.csv')
+                LG_TGL_STATS_PER_RD_NORM_RANK_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_ranking/{RD_NM}.csv')
 
 
 def __normalize_league_gamelogs_stats_minmax__(df):
@@ -106,7 +125,7 @@ def __normalize_league_gamelogs_stats_ranking__(df):
 
 
 if __name__ == '__main__':
-    if MODE == 'norm_gamelogs_stats':
+    if MODE == 'all':
         normalize_gamelogs_stats_regular_season()
     else:
         print(f'Invalid mode: {MODE}')
