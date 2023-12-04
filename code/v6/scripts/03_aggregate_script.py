@@ -39,7 +39,7 @@ def __compute_venue_streak_count__(series):
     idx_sequence = []
     count = 0
     for i in range(len(series)):
-        if i == 0 or series[i] != series[i-1]:
+        if i == 0 or series.iloc[i] != series.iloc[i-1]:
             count = 0
         else:
             count += 1
@@ -92,13 +92,16 @@ def compute_gamelog_stats_regular_season():
                     'Opp_html_id':'Opp_id',
                 },level=1
             )
+            TGL_IDX = pd.MultiIndex.from_arrays([TGL_DF.index,TGL_DF[('Match','Team_id')]],names=['index','Team_id'])
+            TGL_DF.set_index(TGL_IDX,inplace=True)
             # Compute the expanding and rolling stats
             TGL_MDATE_DF = TGL_DF[('Match','Date')]
+            TM_HM_AW = TGL_DF[('Match','H/A')]
             TGL_VEN_STRK_CNT = __compute_venue_streak_count__(TGL_DF[('Match','H/A')]).rename(('Match','Venue_Strk_Cnt'))
             TGL_DAYS_BTW_2GM = __compute_days_between_rows__(TGL_MDATE_DF,window=2).rename(('Match','Days_Btw_2GM'))
             TGL_DAYS_BTW_3GM = __compute_days_between_rows__(TGL_MDATE_DF,window=3).rename(('Match','Days_Btw_3GM'))
             TGL_DAYS_BTW_4GM = __compute_days_between_rows__(TGL_MDATE_DF,window=4).rename(('Match','Days_Btw_4GM'))
-            TGL_DAYS_BTW_GM_DF = pd.concat([TGL_DAYS_BTW_2GM,TGL_DAYS_BTW_3GM,TGL_DAYS_BTW_4GM,TGL_VEN_STRK_CNT],axis=1) 
+            TGL_DAYS_BTW_GM_DF = pd.concat([TM_HM_AW,TGL_VEN_STRK_CNT,TGL_DAYS_BTW_2GM,TGL_DAYS_BTW_3GM,TGL_DAYS_BTW_4GM],axis=1).droplevel(0,axis=1)
             # Compute the total points, spread points
             TGL_RESULT_DF = TGL_DF['Result'].copy()
             TGL_PTS_TOTAL = __compute_pts_total__(TGL_RESULT_DF[['Tm','Opp']]).rename('Pts_Total')
@@ -132,7 +135,7 @@ def compute_gamelog_stats_regular_season():
 
             # Save the computed gamelogs csv
             TGL_DICT = {
-                'facts_rest_days' : TGL_DAYS_BTW_GM_DF,   'facts_gm_results'   : TGL_RESULT_DF,
+                'facts_venue_rest_days' : TGL_DAYS_BTW_GM_DF,   'facts_gm_results'   : TGL_RESULT_DF,
                 'stats_cumu_avg'    : TGL_STATS_CUMU_AVG_DF,    'stats_cumu_std'    : TGL_STATS_CUMU_STD_DF,
                 'stats_roll_04_avg' : TGL_STATS_ROLL_04_AVG_DF, 'stats_roll_04_std' : TGL_STATS_ROLL_04_STD_DF,
                 'stats_roll_08_avg' : TGL_STATS_ROLL_08_AVG_DF, 'stats_roll_08_std' : TGL_STATS_ROLL_08_STD_DF,
@@ -157,7 +160,7 @@ def compute_gamelog_stats_regular_season():
             TGL_STATS_DIR = SRC_TGL_CSV.replace(SRC_DIR,'').replace('.csv','')
             make_directory(f'{TGT_DIR}/{TGL_STATS_DIR}')
             for TBL_ID, DF in TGL_DICT.items():
-                DF.to_csv(f'{TGT_DIR}/{TGL_STATS_DIR}/{TBL_ID}.csv', index=False)
+                DF.to_csv(f'{TGT_DIR}/{TGL_STATS_DIR}/{TBL_ID}.csv',index=True)
                   
         except Exception as e:
             print(f'Error computing stats for {SRC_TGL_CSV}: {e}\n{e.__traceback__}')
