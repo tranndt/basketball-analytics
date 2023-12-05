@@ -1,0 +1,36 @@
+data_dirs:
+  data_facts_dir:       ../00-data-facts
+  data_html_dir:        ../01-data-html
+  data_parsed_dir:      ../02-data-parsed
+  data_aggregated_dir:  ../03-data-aggregated
+  data_normalized_dir:  ../04-data-normalized
+  data_indexed_dir:     ../05-data-indexed
+  data_reindexed_dir:   ../06-data-normalized-reindexed
+  data_compiled_dir:    ../07-data-compiled
+
+src_data:
+  src_dir: ../06-data-normalized-reindexed
+  seasons:
+    start: 1
+    end: 10
+  opponent: True
+  feature_groups:
+    - facts_venue_rest_days_tgl_basic
+    - norm_minmax_tgl_basic_stats_cumu_avg
+    - norm_minmax_tgl_basic_stats_ven_cumu_avg
+    - norm_minmax_tgl_basic_stats_roll_08_avg
+    - norm_minmax_tgl_advanced_stats_cumu_avg
+    - norm_minmax_tgl_advanced_stats_ven_cumu_avg
+    - norm_minmax_tgl_advanced_stats_roll_08_avg
+  label_groups: 
+    facts_gm_results_tgl_basic
+
+tgt_data:
+  tgt_dir: ../07-data-compiled
+  dataset_name: dataset-ss0110-mnmx-7fg
+  description: Null
+
+
+
+
+

@@ -11,11 +11,7 @@ code/v5/dev/03_basketball_reference/demo2
 code/v5/dev/03_basketball_reference/demo
 Volumes/*
 *.DS_Store
-code/v6/data-html
-code/v6/data-parsed
-code/v6/data-computed
-code/v6/data-normalized
-code/v6/data-indexed
-code/v6/data-aggregated
-code/v6/data*
+code/v6/*-data-*
+*.zip
+
 

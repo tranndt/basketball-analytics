@@ -24,7 +24,7 @@ TGT_DIR = args.targetdir
 MODE = args.mode
 
 
-def parse_matchday_team_opponent_games_index(TM_SS_HTML_LIST):
+def __parse_matchday_team_opponent_games_index__(TM_SS_HTML_LIST):
     # LG_SS_DIR = parse_league_id(LG_SS_HTML)['body']
     TGL_BASIC_INFO_DF_LIST = []
     for TM_SS_HTML in TM_SS_HTML_LIST:
@@ -48,7 +48,7 @@ def parse_matchday_team_opponent_games_index(TM_SS_HTML_LIST):
     TM_OPP_GM_IDX_DF = pd.concat([DUMMY_IDX,TM_OPP_GM_IDX_DF]).sort_index(axis=0)
     return TM_OPP_GM_IDX_DF
 
-def parse_team_previous_games_index(TM_OPP_GM_IDX_DF):
+def __parse_team_previous_games_index__(TM_OPP_GM_IDX_DF):
     TM_GM_IDX_DF = TM_OPP_GM_IDX_DF.loc[:,('Team',slice(None))].copy()
     TM_PREV_GM_IDX_DF = []
     for team in set(pd.unique(TM_GM_IDX_DF[('Team','Team_id')])).difference([-1]):
@@ -71,7 +71,7 @@ def parse_team_previous_games_index(TM_OPP_GM_IDX_DF):
             TM_PREV_GM_IDX_DF.insert(i,col,INT_COL)
     return TM_PREV_GM_IDX_DF
 
-def parse_team_previous_opponents_index(TM_OPP_GM_IDX_DF,TM_PREV_GM_IDX_DF):
+def __parse_team_previous_opponents_index__(TM_OPP_GM_IDX_DF,TM_PREV_GM_IDX_DF):
     OPP_IDX_FACTS_DF = TM_OPP_GM_IDX_DF.loc[:,('Opp',slice(None))].copy()
     TM_PREV_OPP_IDX_DF = []
     for col in TM_PREV_GM_IDX_DF.columns.levels[0]:
@@ -86,7 +86,7 @@ def parse_team_previous_opponents_index(TM_OPP_GM_IDX_DF,TM_PREV_GM_IDX_DF):
             TM_PREV_OPP_IDX_DF.insert(i,col,INT_COL)
     return TM_PREV_OPP_IDX_DF
 
-def parse_team_venue_previous_games_index(TM_OPP_GM_IDX_DF):
+def __parse_team_venue_previous_games_index__(TM_OPP_GM_IDX_DF):
     TM_GM_IDX_DF = TM_OPP_GM_IDX_DF.loc[:,('Team',slice(None))].copy()
     TM_VEN_PREV_GM_IDX_DF_LIST = []
     for TM in set(pd.unique(TM_GM_IDX_DF[('Team','Team_id')])).difference([-1]):
@@ -108,7 +108,7 @@ def parse_team_venue_previous_games_index(TM_OPP_GM_IDX_DF):
     return TM_VEN_PREV_GM_IDX_DF
 
 
-def parse_team_opponent_previous_h2h_index(TM_OPP_GM_IDX_DF):
+def __parse_team_opponent_previous_h2h_index__(TM_OPP_GM_IDX_DF):
     TEAMS = set(pd.unique(TM_OPP_GM_IDX_DF[('Team','Team_id')])).difference([-1])
     TM_OPP_H2H_IDX_DF_LIST = []
     for TM_ID in TEAMS:
@@ -137,7 +137,7 @@ def parse_team_opponent_previous_h2h_index(TM_OPP_GM_IDX_DF):
     OPP_PREV_H2H_IDX_DF = TM_OPP_PREV_H2H_IDX_DF[OPP_COLS]
     return TM_PREV_H2H_IDX_DF,OPP_PREV_H2H_IDX_DF
 
-def parse_opponent_previous_games_index(TM_OPP_GM_IDX_DF,TM_PREV_VEN_GM_IDX_DF):
+def __parse_opponent_previous_games_index__(TM_OPP_GM_IDX_DF,TM_PREV_VEN_GM_IDX_DF):
     DUMMY_IDX_VAL = (-1,-1,-1,-1)
     OPP_IDX_FACTS_DF = TM_OPP_GM_IDX_DF.loc[:,('Opp',slice(None))].drop([DUMMY_IDX_VAL]).copy()
     OPP_PREV_GM_IDX_DF = TM_PREV_VEN_GM_IDX_DF.loc[pd.MultiIndex.from_frame(OPP_IDX_FACTS_DF)]
@@ -148,7 +148,7 @@ def parse_opponent_previous_games_index(TM_OPP_GM_IDX_DF,TM_PREV_VEN_GM_IDX_DF):
     OPP_PREV_GM_IDX_DF.rename(columns=dict(zip(ORG_COL_NAMES,NEW_COL_NAMES)),inplace=True)
     return OPP_PREV_GM_IDX_DF
 
-def parse_opponent_previous_opponents_index(TM_OPP_GM_IDX_DF,TM_PREV_OPP_IDX_DF):
+def __parse_opponent_previous_opponents_index__(TM_OPP_GM_IDX_DF,TM_PREV_OPP_IDX_DF):
     DUMMY_IDX_VAL = (-1,-1,-1,-1)
     OPP_IDX_FACTS_DF = TM_OPP_GM_IDX_DF.loc[:,('Opp',slice(None))].drop([DUMMY_IDX_VAL]).copy()
     OPP_PREV_OPP_IDX_DF         = TM_PREV_OPP_IDX_DF.loc[pd.MultiIndex.from_frame(OPP_IDX_FACTS_DF)].copy()
@@ -159,7 +159,7 @@ def parse_opponent_previous_opponents_index(TM_OPP_GM_IDX_DF,TM_PREV_OPP_IDX_DF)
     OPP_PREV_OPP_IDX_DF.rename(columns=dict(zip(ORG_COL_NAMES,NEW_COL_NAMES)),inplace=True)
     return OPP_PREV_OPP_IDX_DF
 
-def parse_opponent_venue_previous_games_index(TM_OPP_GM_IDX_DF,TM_PREV_VEN_GM_IDX_DF):
+def __parse_opponent_venue_previous_games_index__(TM_OPP_GM_IDX_DF,TM_PREV_VEN_GM_IDX_DF):
     DUMMY_IDX_VAL = (-1,-1,-1,-1)
     OPP_IDX_FACTS_DF = TM_OPP_GM_IDX_DF.loc[:,('Opp',slice(None))].drop([DUMMY_IDX_VAL]).copy()
     OPP_VEN_PREV_GM_IDX_DF = TM_PREV_VEN_GM_IDX_DF.loc[pd.MultiIndex.from_frame(OPP_IDX_FACTS_DF)]
@@ -169,6 +169,23 @@ def parse_opponent_venue_previous_games_index(TM_OPP_GM_IDX_DF,TM_PREV_VEN_GM_ID
     OPP_VEN_PREV_GM_IDX_DF.rename(columns=dict(zip(ORG_COL_NAMES,NEW_COL_NAMES)),inplace=True)
     return OPP_VEN_PREV_GM_IDX_DF
 
+
+def __parse_team_opp_main_index__(TM_PREV_GM_IDX_DF,TM_VEN_PREV_GM_IDX_DF,TM_PREV_H2H_IDX_DF,TM_PREV_OPP_IDX_DF,
+                              OPP_PREV_GM_IDX_DF, OPP_VEN_PREV_GM_IDX_DF,OPP_PREV_H2H_IDX_DF,OPP_PREV_OPP_IDX_DF):
+    TM_MAIN_IDX_DF = pd.concat([TM_PREV_GM_IDX_DF.loc[:,(slice('Team_Curr_Gm','Team_Prev_Gm_01'),slice(None))],
+            TM_VEN_PREV_GM_IDX_DF.loc[:,('Team_Ven_Prev_Gm_01',slice(None))],
+            TM_PREV_H2H_IDX_DF.loc[:,('Team_Prev_H2H_Gm_01',slice(None))],
+                TM_PREV_OPP_IDX_DF.loc[:,('Team_Prev_Gm_Opp_01',slice(None))],
+            ],axis=1)
+
+    OPP_MAIN_IDX_DF = pd.concat([OPP_PREV_GM_IDX_DF.loc[:,(slice('Opp_Curr_Gm','Opp_Prev_Gm_01'),slice(None))],
+                OPP_VEN_PREV_GM_IDX_DF.loc[:,('Opp_Ven_Prev_Gm_01',slice(None))],
+                OPP_PREV_H2H_IDX_DF.loc[:,('Opp_Prev_H2H_Gm_01',slice(None))],
+                OPP_PREV_OPP_IDX_DF.loc[:,('Opp_Prev_Gm_Opp_01',slice(None))],
+                ],axis=1)
+
+    TM_OPP_MAIN_IDX_DF = pd.concat([TM_MAIN_IDX_DF,OPP_MAIN_IDX_DF],axis=1)
+    return TM_OPP_MAIN_IDX_DF
 
 def parse_all_index():
     """
@@ -196,44 +213,48 @@ def parse_all_index():
     """
     LG_SS_HTML_DICT_STR = load_file(f'{SRC_DIR}/league_seasons_html.txt')
     LG_SS_HTML_DICT = ast.literal_eval(LG_SS_HTML_DICT_STR)
-    TQDM_LG_SS_HTML_DICT_KEYS = tqdm(list(LG_SS_HTML_DICT.keys())[79:],ncols=150)
+    TQDM_LG_SS_HTML_DICT_KEYS = tqdm(list(LG_SS_HTML_DICT.keys()),ncols=150)
     for LG_SS_HTML in TQDM_LG_SS_HTML_DICT_KEYS:
         TQDM_LG_SS_HTML_DICT_KEYS.set_description(f'{LG_SS_HTML}')
         TM_SS_HTML_LIST = LG_SS_HTML_DICT[LG_SS_HTML]
-        TM_OPP_GM_IDX_FULL_DF        = parse_matchday_team_opponent_games_index(TM_SS_HTML_LIST)
-        # TM_PREV_GM_IDX_DF       = parse_team_previous_games_index(TM_OPP_GM_IDX_FULL_DF)
-        # TM_PREV_OPP_IDX_DF      = parse_team_previous_opponents_index(TM_OPP_GM_IDX_FULL_DF,TM_PREV_GM_IDX_DF)
-        # TM_VEN_PREV_GM_IDX_DF   = parse_team_venue_previous_games_index(TM_OPP_GM_IDX_FULL_DF)
-        # OPP_PREV_GM_IDX_DF      = parse_opponent_previous_games_index(TM_OPP_GM_IDX_FULL_DF,TM_PREV_GM_IDX_DF)
-        # OPP_PREV_OPP_IDX_DF     = parse_opponent_previous_opponents_index(TM_OPP_GM_IDX_FULL_DF,TM_PREV_OPP_IDX_DF)
-        # OPP_VEN_PREV_GM_IDX_DF  = parse_opponent_venue_previous_games_index(TM_OPP_GM_IDX_FULL_DF,TM_VEN_PREV_GM_IDX_DF)
-        # TM_PREV_H2H_IDX_DF,OPP_PREV_H2H_IDX_DF = parse_team_opponent_previous_h2h_index(TM_OPP_GM_IDX_FULL_DF)
-        
+        TM_OPP_GM_IDX_FULL_DF   = __parse_matchday_team_opponent_games_index__(TM_SS_HTML_LIST)
+        TM_PREV_GM_IDX_DF       = __parse_team_previous_games_index__(TM_OPP_GM_IDX_FULL_DF)
+        TM_PREV_OPP_IDX_DF      = __parse_team_previous_opponents_index__(TM_OPP_GM_IDX_FULL_DF,TM_PREV_GM_IDX_DF)
+        TM_VEN_PREV_GM_IDX_DF   = __parse_team_venue_previous_games_index__(TM_OPP_GM_IDX_FULL_DF)
+        OPP_PREV_GM_IDX_DF      = __parse_opponent_previous_games_index__(TM_OPP_GM_IDX_FULL_DF,TM_PREV_GM_IDX_DF)
+        OPP_PREV_OPP_IDX_DF     = __parse_opponent_previous_opponents_index__(TM_OPP_GM_IDX_FULL_DF,TM_PREV_OPP_IDX_DF)
+        OPP_VEN_PREV_GM_IDX_DF  = __parse_opponent_venue_previous_games_index__(TM_OPP_GM_IDX_FULL_DF,TM_VEN_PREV_GM_IDX_DF)
+        TM_PREV_H2H_IDX_DF,OPP_PREV_H2H_IDX_DF = __parse_team_opponent_previous_h2h_index__(TM_OPP_GM_IDX_FULL_DF)
+        TM_OPP_MAIN_IDX_DF      = __parse_team_opp_main_index__(TM_PREV_GM_IDX_DF,TM_VEN_PREV_GM_IDX_DF,TM_PREV_H2H_IDX_DF,TM_PREV_OPP_IDX_DF,
+                                        OPP_PREV_GM_IDX_DF, OPP_VEN_PREV_GM_IDX_DF,OPP_PREV_H2H_IDX_DF,OPP_PREV_OPP_IDX_DF)
+
         # Clean up the index
-        TM_OPP_GM_IDX_FULL_DF = TM_OPP_GM_IDX_FULL_DF.drop((-1,-1,-1,-1))
-        TM_OPP_GM_IDX_DF = TM_OPP_GM_IDX_FULL_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
-        # TM_PREV_GM_IDX_DF = TM_PREV_GM_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
-        # TM_PREV_OPP_IDX_DF = TM_PREV_OPP_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
-        # TM_VEN_PREV_GM_IDX_DF = TM_VEN_PREV_GM_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
-        # TM_PREV_H2H_IDX_DF = TM_PREV_H2H_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
-        # OPP_PREV_GM_IDX_DF = OPP_PREV_GM_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
-        # OPP_PREV_OPP_IDX_DF = OPP_PREV_OPP_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
-        # OPP_VEN_PREV_GM_IDX_DF = OPP_VEN_PREV_GM_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
-        # OPP_PREV_H2H_IDX_DF = OPP_PREV_H2H_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
+        TM_OPP_GM_IDX_FULL_DF   = TM_OPP_GM_IDX_FULL_DF.drop((-1,-1,-1,-1))
+        TM_OPP_GM_IDX_DF        = TM_OPP_GM_IDX_FULL_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
+        TM_PREV_GM_IDX_DF       = TM_PREV_GM_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
+        TM_PREV_OPP_IDX_DF      = TM_PREV_OPP_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
+        TM_VEN_PREV_GM_IDX_DF   = TM_VEN_PREV_GM_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
+        TM_PREV_H2H_IDX_DF      = TM_PREV_H2H_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
+        OPP_PREV_GM_IDX_DF      = OPP_PREV_GM_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
+        OPP_PREV_OPP_IDX_DF     = OPP_PREV_OPP_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
+        OPP_VEN_PREV_GM_IDX_DF  = OPP_VEN_PREV_GM_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
+        OPP_PREV_H2H_IDX_DF     = OPP_PREV_H2H_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
+        TM_OPP_MAIN_IDX_DF      = TM_OPP_MAIN_IDX_DF.droplevel([2,3],axis=0).drop(columns=['H/A','Boxscores_id'],level=1)
 
         # Save the index
         LG_SS_DIR = parse_league_id(LG_SS_HTML)['body']
         make_directory(f'{TGT_DIR}/{LG_SS_DIR}')
+        TM_OPP_MAIN_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/team_opp_main_index.csv',index=True)
         TM_OPP_GM_IDX_FULL_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/team_opp_games_full_index.csv',index=True)
         TM_OPP_GM_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/team_opp_games_index.csv',index=True)
-        # TM_PREV_GM_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/team_prev_games_index.csv',index=True)
-        # TM_PREV_OPP_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/team_prev_opp_index.csv',index=True)
-        # TM_VEN_PREV_GM_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/team_ven_prev_index.csv',index=True)
-        # TM_PREV_H2H_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/team_prev_h2h_index.csv',index=True)
-        # OPP_PREV_GM_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/opp_prev_games_index.csv',index=True)
-        # OPP_PREV_OPP_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/opp_prev_opp_index.csv',index=True)
-        # OPP_VEN_PREV_GM_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/opp_ven_prev_index.csv',index=True)
-        # OPP_PREV_H2H_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/opp_prev_h2h_index.csv',index=True)
+        TM_PREV_GM_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/team_prev_games_index.csv',index=True)
+        TM_PREV_OPP_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/team_prev_opp_index.csv',index=True)
+        TM_VEN_PREV_GM_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/team_ven_prev_index.csv',index=True)
+        TM_PREV_H2H_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/team_prev_h2h_index.csv',index=True)
+        OPP_PREV_GM_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/opp_prev_games_index.csv',index=True)
+        OPP_PREV_OPP_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/opp_prev_opp_index.csv',index=True)
+        OPP_VEN_PREV_GM_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/opp_ven_prev_index.csv',index=True)
+        OPP_PREV_H2H_IDX_DF.to_csv(f'{TGT_DIR}/{LG_SS_DIR}/opp_prev_h2h_index.csv',index=True)
 
 # Run the script
 if __name__ == '__main__':

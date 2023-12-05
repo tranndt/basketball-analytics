@@ -3,6 +3,7 @@ sys.path.insert(0,'../')
 from file_tools import *
 from request_tools import *
 from parse_tools import *
+from load_tools import *
 import time
 from tqdm import tqdm
 import argparse
@@ -13,8 +14,8 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 parser = argparse.ArgumentParser(description='Normalize basketball-reference.com data')
 parser.add_argument('-d', '--debug', action='store_true', help='Debug mode')
-parser.add_argument('-s', '--sourcedir', type=str, default='../data-aggregated/', help='Source directory')
-parser.add_argument('-t', '--targetdir', type=str, default='../data-normalized/', help='Target directory')
+parser.add_argument('-s', '--sourcedir', type=str, default='../03-data-aggregated/', help='Source directory')
+parser.add_argument('-t', '--targetdir', type=str, default='../04-data-normalized/', help='Target directory')
 parser.add_argument('-m', '--mode', type=str, default='all', help='')
 
 args = parser.parse_args()
@@ -30,20 +31,19 @@ def normalize_gamelogs_stats_regular_season():
     Summary:
 
     Usage:
-        python3 04_normalize_script.py -s ../data-aggregated/ -t ../data-normalized/
+        python3 04_normalize_script.py -s ../03-data-aggregated/ -t ../04-data-normalized/
     
     """
     # Load list of league seasons
-    LG_SS_HTML_DICT = {}
-    if file_exists(f'{SRC_DIR}/league_seasons_html.txt'):
-        LG_SS_HTML_DICT_STR = load_file(f'{SRC_DIR}/league_seasons_html.txt')
-        LG_SS_HTML_DICT = ast.literal_eval(LG_SS_HTML_DICT_STR)
-    else:
+    LG_FACTS_DIR = '../00-data-facts/'
+
+    LG_SS_HTML_DICT = load_league_seasons_dict(LG_FACTS_DIR)
+    if not LG_SS_HTML_DICT:
         print('league_seasons_html.txt not found. Please scrape it first.')
         return
 
     # For every league_season, get all team_seasons belonging to the league
-    TQDM_LG_SS_HTML_DICT = tqdm(LG_SS_HTML_DICT.items(),position=0, leave=True,ncols=125)
+    TQDM_LG_SS_HTML_DICT = tqdm(list(LG_SS_HTML_DICT.items()),position=0, leave=True,ncols=125)
     for LG_SS_HTML, LG_TM_HTML_LIST in TQDM_LG_SS_HTML_DICT:
         TQDM_LG_SS_HTML_DICT.set_description(f'{LG_SS_HTML}')
         LG_SS_DIR = parse_league_id(LG_SS_HTML)['body']
@@ -77,7 +77,7 @@ def normalize_gamelogs_stats_regular_season():
             make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_standard')
             make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_robust')
             make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/norm_ranking')
-            for RD_INDEX in range(len(LG_TGL_STATS_PER_TM_LIST[0])):
+            for RD_INDEX in range(max([len(i) for i in LG_TGL_STATS_PER_TM_LIST])):
                 LG_TGL_STATS_PER_RD_DF = []
                 for TGL_STATS_TM in LG_TGL_STATS_PER_TM_LIST:
                     if RD_INDEX >= len(TGL_STATS_TM):
@@ -112,7 +112,7 @@ def normalize_gamelogs_stats_regular_season():
 
             # Create a table for each round in the league season
             make_directory(f'{TGT_DIR}/{LG_SS_DIR}/{TGL_STATS_TYPE}/facts')
-            for RD_INDEX in range(len(LG_TGL_FACTS_PER_TM_LIST[0])):
+            for RD_INDEX in range(max([len(i) for i in LG_TGL_FACTS_PER_TM_LIST])):
                 LG_TGL_FACTS_PER_RD_DF = []
                 for TGL_STATS_TM in LG_TGL_FACTS_PER_TM_LIST:
                     if RD_INDEX >= len(TGL_STATS_TM):

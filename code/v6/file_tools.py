@@ -1,4 +1,5 @@
 import os
+import yaml
 
 # function to save a file
 def save_file(file_name, content):
@@ -31,6 +32,10 @@ def get_all_files_recursive(directory, file_type = None):
 def get_all_folders(directory):
     root, dirs, files = list(os.walk(directory))[0]
     return dirs
+
+def get_all_folders_recursive(directory, folder_endswith=None):
+    return sorted([os.path.join(root, dir_) for root, dirs, files in os.walk(directory) for dir_ in dirs if not folder_endswith or dir_.endswith(folder_endswith)])
+
     
 # Check if a file exists
 def file_exists(file_name):
@@ -53,4 +58,13 @@ def make_directory(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+
+def load_yaml(file_path):
+    with open(file_path, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
+
+def save_yaml(file_path, config):
+    with open(file_path, 'w') as file:
+        yaml.dump(config, file, default_flow_style=False)
         
