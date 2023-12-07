@@ -1,3 +1,4 @@
+import json
 import os
 import yaml
 
@@ -67,4 +68,14 @@ def load_yaml(file_path):
 def save_yaml(file_path, config):
     with open(file_path, 'w') as file:
         yaml.dump(config, file, default_flow_style=False)
+
+def load_json(file_path):
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    return data
+
+def save_json(file_path, data):
+    with open(file_path, 'w') as file:
+        json.dump(data, file)
+        
         

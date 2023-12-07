@@ -1,0 +1,32 @@
+data_dirs:
+  data_aggregated_dir: ../03-data-aggregated
+  data_compiled_dir: ../07-data-compiled
+  data_facts_dir: ../00-data-facts
+  data_html_dir: ../01-data-html
+  data_indexed_dir: ../05-data-indexed
+  data_normalized_dir: ../04-data-normalized
+  data_parsed_dir: ../02-data-parsed
+  data_reindexed_dir: ../06-data-normalized-reindexed
+  experiments_dir: ../08-experiments
+experiment:
+  description: null
+  experiment_name: null
+  feature_selection:
+    mode: percentile
+    params:
+    - 10
+    - 20
+    - 30
+    - 50
+    # - 75
+    scoring_funcs: regression
+  model_selection:
+    cv: 3
+    model_params: regression
+    models: regression
+    scoring_funcs: regression
+src_data:
+  label_name: Pts_Total
+  src_dir: ../07-data-compiled/dataset-ss0110-mnmx-7fg
+tgt_data:
+  tgt_dir: ../08-experiments/dataset-ss0110-mnmx-7fg/Pts_Total

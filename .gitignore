@@ -4,6 +4,7 @@ data/21-22
 .history
 .vscode
 __backup__
+code/v6/__archived__
 code/v3/basketball-reference.com
 code/v4/experiments
 code/v5/data
@@ -12,6 +13,7 @@ code/v5/dev/03_basketball_reference/demo
 Volumes/*
 *.DS_Store
 code/v6/*-data-*
+code/v6/08-experiments
 *.zip
 
 
