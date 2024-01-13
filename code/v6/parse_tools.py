@@ -101,7 +101,7 @@ def __parse_boxscores_tables_type2__(html_text):
 
             df_team_stats = parse_as_html_table_with_hrefs(table_elmt.prettify())
             df_team_stats.columns = df_team_stats.columns.str.lower()
-            for na_keywords in ['Did Not Play','Did Not Dress','Coach\'s Decision','']:
+            for na_keywords in ['Did Not Play','Did Not Dress','Coach\'s Decision','','Not With Team']: # There could be some missing keywords
                 df_team_stats.replace(na_keywords, pd.NA,inplace=True)
 
             df_team_totals = df_team_stats[df_team_stats['starters'] == 'Team Totals'].copy()

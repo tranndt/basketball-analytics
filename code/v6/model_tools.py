@@ -58,6 +58,13 @@ class ModelStack:
         elif models == 'regression':
             models = ModelStack.MODELS_REGRESSION
             model_params = ModelStack.MODEL_PARAMS_REGRESSION
+        elif isinstance(models, list):
+            joined_models_dicts = ModelStack.MODELS_CLASSIFICATION.update(ModelStack.MODELS_REGRESSION)
+            joined_model_params_dicts = ModelStack.MODEL_PARAMS_CLASSIFICATION.update(ModelStack.MODEL_PARAMS_REGRESSION)
+            models = {k:v for k,v in joined_models_dicts.items() if k in models}
+            model_params = {k:v for k,v in joined_model_params_dicts.items() if k in models}
+            # scoring_funcs = [FeatureStack.SCORING_FUNCS_DICT[f] for f in scoring_funcs if f in FeatureStack.SCORING_FUNCS_DICT.keys()]
+
         self.models = models 
         self.model_params = model_params
         self.predictions = None
@@ -69,11 +76,13 @@ class ModelStack:
             model.set_params(**self.model_params[model_name])
             self.models[model_name] = model
 
-    def fit_predict(self, X, y, **kwargs):
+    def fit_predict(self, X, y, scaler=None, **kwargs):
         X_train, X_val, y_train, y_val = train_test_split(X, y, **kwargs)
-
         train_predictions = pd.DataFrame(index=X_train.index)
         val_predictions = pd.DataFrame(index=X_val.index)
+        if scaler is not None:
+            X_train = scaler.fit_transform(X_train)
+            X_val = scaler.transform(X_val)
 
         for model_name, model in self.models.items():
             fitted_model = model.fit(X_train, y_train)
@@ -107,8 +116,31 @@ class ModelStack:
         scores = pd.Series(scores).unstack(level=[1,0]).sort_index(axis=1)
         self.scores = scores
         return scores
+    
+    @classmethod
+    def score(cls,y_preds,y_true=None, score_names='classification'):
+        if score_names == 'classification':
+            score_names = ModelStack.SCORES_CLASSIFICATION
+        elif score_names == 'regression':
+            score_names = ModelStack.SCORES_REGRESSION
+        elif isinstance(score_names, str):
+            score_names = [score_names]
+        elif isinstance(score_names, list):
+            score_names = [score_name for score_name in score_names if score_name in ModelStack.SCORES_CLASSIFICATION + ModelStack.SCORES_REGRESSION]
+            
+        y_preds_ = y_preds.copy()
+        if y_true is None:
+            y_true = y_preds_.pop('y_true')
+        scores = {}
+        for model_name in y_preds.columns.drop('y_true'):
+            for score_name in score_names:
+                val_score = ModelStack._calculate_score(y_true, y_preds_[model_name], score_name)
+                scores[(score_name, model_name)] = val_score
+        scores = pd.Series(scores).unstack(level=[0]).sort_index(axis=1)
+        return scores
 
-    def _calculate_score(self, y_true, y_pred, score_name):
+    @classmethod
+    def _calculate_score(cls,y_true, y_pred, score_name):
         # Classification metrics
         if score_name == 'accuracy':
             return accuracy_score(y_true, y_pred)
@@ -149,10 +181,10 @@ class ModelStackCV(ModelStack):
     scores = model_finder.score(predictions, ModelFinder.SCORES_CLASSIFICATION)
     ```
     """
-    def __init__(self, models, model_params):
+    def __init__(self, models='classification', model_params='classification'):
         super().__init__(models, model_params)
 
-    def fit_predict(self, X, y, cv=3, **kwargs):
+    def fit_predict(self, X, y, cv=3,scaler=None, **kwargs):
         predictions = pd.DataFrame()
         kf_predictions_dict = {}
         kf = KFold(n_splits=cv,**kwargs)
@@ -162,6 +194,9 @@ class ModelStackCV(ModelStack):
 
             kf_train_predictions = pd.DataFrame(index=X_train.index)
             kf_val_predictions = pd.DataFrame(index=X_val.index)
+            if scaler is not None:
+                X_train = scaler.fit_transform(X_train)
+                X_val = scaler.transform(X_val)
 
             for model_name, model in self.models.items():
                 fitted_model = model.fit(X_train, y_train)
@@ -208,6 +243,8 @@ class ModelStackCV(ModelStack):
         self.scores = scores
         return scores
     
+
+    
     
 from sklearn.feature_selection import GenericUnivariateSelect, f_classif, f_regression, mutual_info_classif, mutual_info_regression, r_regression
 import numpy as np
@@ -229,12 +266,24 @@ class FeatureStack:
     """
     CLASSIFCATION_SCORING_FUNCS = [f_classif, mutual_info_classif, r_regression]
     REGRESSION_SCORING_FUNCS =  [f_regression, mutual_info_regression, r_regression]
+    SCORING_FUNCS_DICT = {
+        'f_classif': f_classif,
+        'f_regression': f_regression,
+        'mutual_info_classif': mutual_info_classif,
+        'mutual_info_regression': mutual_info_regression,
+        'r_regression': r_regression
+    }
 
     def __init__(self, scoring_funcs, mode, params):
         if scoring_funcs == 'classification':
             scoring_funcs = FeatureStack.CLASSIFCATION_SCORING_FUNCS
         elif scoring_funcs == 'regression':
             scoring_funcs = FeatureStack.REGRESSION_SCORING_FUNCS
+        elif isinstance(scoring_funcs, str) and scoring_funcs in FeatureStack.SCORING_FUNCS_DICT.keys():
+            scoring_funcs = [FeatureStack.SCORING_FUNCS_DICT[scoring_funcs]]
+        elif isinstance(scoring_funcs, list):
+            scoring_funcs = [FeatureStack.SCORING_FUNCS_DICT[f] for f in scoring_funcs if f in FeatureStack.SCORING_FUNCS_DICT.keys()]
+
         self.scoring_funcs = scoring_funcs
         self.mode = mode
         self.params = params

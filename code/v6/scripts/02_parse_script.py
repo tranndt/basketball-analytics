@@ -28,7 +28,7 @@ def parse_all_team_gamelogs_from_source_dir():
         2. Parse all team gamelogs
         3. Save the parsed gamelogs
     Usage: 
-        python3 02_parse_script.py -m gamelogs -s ../data-html/ -t ../data-parsed/
+        python3 02_parse_script.py -m gamelogs -s ../01-data-html/ -t ../02-data-parsed/
     """
     _FAILS_ = []
     SRC_TM_SS_HTML_TXT = f'{SRC_DIR}/team_seasons_html.txt'
@@ -85,6 +85,9 @@ def parse_all_team_gamelogs_from_source_dir():
 
 
 def parse_all_boxscores_from_source_dir():
+    """
+    python3 02_parse_script.py -m boxscores -s ../01-data-html/boxscores/ -t ../02-data-parsed/
+    """
     # Get all html files from sourcedir
     _FAILS_= []
     BS_HTML_LIST = get_all_files(SRC_DIR, file_type='.html')

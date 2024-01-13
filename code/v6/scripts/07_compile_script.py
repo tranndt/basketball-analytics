@@ -29,18 +29,18 @@ def __load_facts_df__(filename):
     df.columns = pd.MultiIndex.from_product([['Match Info'],df.columns])
     return df
 
-def __get_opp_stats_row_df__(STATS_DF,IDX_DF,TM_IDX):
-    OPP_IDX         = IDX_DF.loc[TM_IDX]
-    OPP_STATS_DF    = STATS_DF.loc[OPP_IDX].to_frame().T
-    OPP_STATS_DF.index = pd.MultiIndex.from_tuples([TM_IDX],names=['index','Team_id'])
-    return OPP_STATS_DF
+# def get_opp_stats_row_df(STATS_DF,IDX_DF,TM_IDX):
+#     OPP_IDX         = IDX_DF.loc[TM_IDX]
+#     OPP_STATS_DF    = STATS_DF.loc[OPP_IDX].to_frame().T
+#     OPP_STATS_DF.index = pd.MultiIndex.from_tuples([TM_IDX],names=['index','Team_id'])
+#     return OPP_STATS_DF
 
-def __get_opp_stats_df__(STATS_DF,IDX_DF):
-    OPP_STATS_DF_LIST = []
-    for TM_IDX in STATS_DF.index:
-        OPP_STATS_DF_LIST.append(__get_opp_stats_row_df__(STATS_DF,IDX_DF,TM_IDX))
-    OPP_STATS_DF = pd.concat(OPP_STATS_DF_LIST,axis=0)
-    return OPP_STATS_DF
+# def get_opp_stats_df(STATS_DF,IDX_DF):
+#     OPP_STATS_DF_LIST = []
+#     for TM_IDX in STATS_DF.index:
+#         OPP_STATS_DF_LIST.append(get_opp_stats_row_df(STATS_DF,IDX_DF,TM_IDX))
+#     OPP_STATS_DF = pd.concat(OPP_STATS_DF_LIST,axis=0)
+#     return OPP_STATS_DF
 
 def compile_dataset(config_yaml):
     """
@@ -82,13 +82,13 @@ def compile_dataset(config_yaml):
                 TM_DATASET_DF = __load_facts_df__(f'{SRC_DATASET_DIR}.csv')
                 DATASETS[f'Team_{SRC_FEATURE}']  = TM_DATASET_DF
                 if OPPONENT:
-                    OPP_DATASET_DF = __get_opp_stats_df__(TM_DATASET_DF,OPP_IDX_DF)
+                    OPP_DATASET_DF = get_opp_stats_df(TM_DATASET_DF,OPP_IDX_DF)
                     DATASETS[f'Opp_{SRC_FEATURE}'] = OPP_DATASET_DF
             else:
                 TM_DATASET_DF = __load_team_stats_df__(f'{SRC_DATASET_DIR}.csv')
                 DATASETS[f'Team_{SRC_FEATURE}']  = TM_DATASET_DF
                 if OPPONENT:
-                    OPP_DATASET_DF = __get_opp_stats_df__(TM_DATASET_DF,OPP_IDX_DF)
+                    OPP_DATASET_DF = get_opp_stats_df(TM_DATASET_DF,OPP_IDX_DF)
                     DATASETS[f'Opp_{SRC_FEATURE}'] = OPP_DATASET_DF
         FEATURES_SS_DF = pd.concat(DATASETS.values(),keys=DATASETS.keys(),axis=1)
         LABELS_SS_DF = __load_facts_df__(f'{SRC_DIR}/{LG_SS_DIR}/{LABEL_GROUPS}.csv')

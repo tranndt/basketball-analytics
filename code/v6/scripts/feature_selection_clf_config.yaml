@@ -14,13 +14,12 @@ experiment:
   feature_selection:
     mode: percentile
     params:
-    - 5
-    - 10
-    # - 15
-    # - 20
-    # - 35
-    # - 50
-    # - 75
+    # - 5
+    # - 10
+    - 25
+    - 50
+    - 75
+    - 100
     scoring_funcs: classification
   model_selection:
     cv: 3
@@ -29,6 +28,6 @@ experiment:
     scoring_funcs: classification
 src_data:
   label_name: W/L
-  src_dir: ../07-data-compiled/dataset-ss0110-mnmx-7fg
+  src_dir: ../07-data-compiled/D0-1523-robust/cumu-bsadv
 tgt_data:
-  tgt_dir: ../08-experiments/dataset-ss0110-mnmx-7fg
+  tgt_dir: ../08-experiments/D0-1523-robust/cumu-bsadv

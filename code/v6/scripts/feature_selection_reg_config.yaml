@@ -14,19 +14,18 @@ experiment:
   feature_selection:
     mode: percentile
     params:
-    - 10
-    - 20
-    - 30
+    # - 35
+    # - 70
     - 50
-    # - 75
-    scoring_funcs: regression
+    - 100
+    scoring_funcs: f_regression # regression
   model_selection:
     cv: 3
     model_params: regression
     models: regression
     scoring_funcs: regression
 src_data:
-  label_name: Pts_Total
-  src_dir: ../07-data-compiled/dataset-ss0110-mnmx-7fg
+  label_name: WL_gradient_pm10
+  src_dir: ../07-data-compiled/D0-1523-robust/r08-bsadv
 tgt_data:
-  tgt_dir: ../08-experiments/dataset-ss0110-mnmx-7fg/Pts_Total
+  tgt_dir: ../08-experiments/D0-1523-robust/r08-bsadv/WL_gradient_pm10

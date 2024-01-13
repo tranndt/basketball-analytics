@@ -1,6 +1,6 @@
-
-
 import sys
+
+from sklearn.preprocessing import StandardScaler
 sys.path.insert(0,'../')
 from file_tools import *
 from request_tools import *
@@ -69,6 +69,8 @@ def run_feature_model_stacks(config_yaml):
 
     if TGT_EXPMNT_NAME is None:
         TGT_EXPMNT_NAME = datetime.now().strftime('%Y%m%d-%H%M%S')
+    else:
+        TGT_EXPMNT_NAME = datetime.now().strftime('%Y%m%d-%H%M%S') + '-' + TGT_EXPMNT_NAME
     make_directory('/'.join([TGT_DIR,TGT_EXPMNT_NAME]))
 
     scores_all = {}
@@ -79,11 +81,11 @@ def run_feature_model_stacks(config_yaml):
         TQDM_FS_TRANSFORM.set_description(f'{meta}')
         if MS_CONFIG_CV is None:
             model_stack = ModelStack(models=MS_CONFIG_MODELS, model_params=MS_CONFIG_MODEL_PARAMS)
-            predictions = model_stack.fit_predict(transformed_X, y)
+            predictions = model_stack.fit_predict(transformed_X, y, scaler=StandardScaler())
             scores = model_stack.score(predictions, score_names=MS_CONFIG_SCORING_FUNCS)
         else:
             model_stack = ModelStackCV(models=MS_CONFIG_MODELS, model_params=MS_CONFIG_MODEL_PARAMS)
-            predictions = model_stack.fit_predict(transformed_X, y, cv=MS_CONFIG_CV)
+            predictions = model_stack.fit_predict(transformed_X, y, cv=MS_CONFIG_CV, scaler=StandardScaler())
             scores = model_stack.score(predictions, score_names=MS_CONFIG_SCORING_FUNCS,avg_cv=True)
         predictions_all[meta]   = predictions
         scores_all[meta]        = scores
@@ -92,10 +94,6 @@ def run_feature_model_stacks(config_yaml):
         predictions_all_df.to_csv('/'.join([TGT_DIR,TGT_EXPMNT_NAME,'predictions.csv']))
         scores_all_df.to_csv('/'.join([TGT_DIR,TGT_EXPMNT_NAME,'scores.csv']))
 
-
-    # if TGT_EXPMNT_NAME is None:
-    #     TGT_EXPMNT_NAME = datetime.now().strftime('%Y%m%d-%H%M%S')
-    # make_directory('/'.join([TGT_DIR,TGT_EXPMNT_NAME]))
     predictions_all_df      = pd.concat(predictions_all.values(), keys=predictions_all.keys(), axis=1)
     scores_all_df = pd.concat(scores_all.values(), keys=scores_all.keys(), axis=0)
     predictions_all_df.to_csv('/'.join([TGT_DIR,TGT_EXPMNT_NAME,'predictions.csv']))
