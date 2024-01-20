@@ -9,7 +9,9 @@ from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error, a
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.svm import SVC, SVR
-
+from tqdm import tqdm
+from file_tools import *
+from datetime import datetime
 
 class ModelStack:
     MODELS_CLASSIFICATION = {
@@ -27,7 +29,7 @@ class ModelStack:
         'SVR': SVR(),
         'LinearRegression': LinearRegression(),
         'MLPRegressor': MLPRegressor(),
-        'KNeighborsRegressor': KNeighborsRegressor(),
+        # 'KNeighborsRegressor': KNeighborsRegressor(),
         'AdaBoostRegressor': AdaBoostRegressor()
     }
     MODEL_PARAMS_CLASSIFICATION = {
@@ -45,7 +47,7 @@ class ModelStack:
         'SVR': {},
         'LinearRegression': {},
         'MLPRegressor': {},
-        'KNeighborsRegressor': {},
+        # 'KNeighborsRegressor': {},
         'AdaBoostRegressor': {}
     }
     SCORES_CLASSIFICATION = ['accuracy','f1','precision','recall']
@@ -175,7 +177,7 @@ class ModelStackCV(ModelStack):
     Sample Usage:
     -------------
     ```
-    model_finder = ModelFinderCV(ModelFinder.MODELS_CLASSIFICATION, ModelFinder.MODEL_PARAMS_CLASSIFICATION)
+    model_finder = ModelStackCV(ModelFinder.MODELS_CLASSIFICATION, ModelFinder.MODEL_PARAMS_CLASSIFICATION)
     X, y = make_classification(n_samples=1000, n_features=20, random_state=2)  # Example dataset
     predictions = model_finder.fit_predict(pd.DataFrame(X), pd.Series(y), cv=3)
     scores = model_finder.score(predictions, ModelFinder.SCORES_CLASSIFICATION)
@@ -185,6 +187,7 @@ class ModelStackCV(ModelStack):
         super().__init__(models, model_params)
 
     def fit_predict(self, X, y, cv=3,scaler=None, **kwargs):
+           
         predictions = pd.DataFrame()
         kf_predictions_dict = {}
         kf = KFold(n_splits=cv,**kwargs)
@@ -242,7 +245,52 @@ class ModelStackCV(ModelStack):
 
         self.scores = scores
         return scores
-    
+
+    def run_experiment(
+        self,
+        X,
+        y,
+        cv,
+        scaler,
+        score_names,
+        save_dir = None,
+        experiment_name='experiment',
+    ):
+        if save_dir:
+            experiment_name = datetime.now().strftime('%Y%m%d-%H%M%S')+f'-{experiment_name}'
+            save_dir = os.path.join(save_dir,experiment_name)
+            make_directory(save_dir)
+        # If X and y are dictionaries, then run experiment for each key
+        if isinstance(X,dict):
+            predictions = {}
+            scores = {}
+            TQDM_X_ITEMS = tqdm(X.items(),ncols=150)
+            for name,Xi in TQDM_X_ITEMS:
+                TQDM_X_ITEMS.set_description(name)
+                try:
+                    yi = y[name] if isinstance(y,dict) else y
+                    predictions[name] = self.fit_predict(Xi,yi,cv=cv,scaler=scaler)
+                    scores[name] = self.score(predictions[name], score_names)
+                    if save_dir:
+                        pd.concat(predictions,axis=0).to_csv(os.path.join(save_dir,'predictions.csv'))
+                        pd.concat(scores,axis=0).to_csv(os.path.join(save_dir,'scores.csv'))
+                except Exception as e:
+                    # Skipping any potential error when handling one of the dataframes
+                    print(f'Skipped experiment for {name} due to: {e}')
+                    continue
+            predictions = pd.concat(predictions,axis=0)
+            scores = pd.concat(scores,axis=0)
+
+        # Else run experiment for the whole dataset
+        else:
+            predictions = self.fit_predict(X,y,cv=cv,scaler=scaler)
+            scores = self.score(predictions, score_names)
+
+        # Save Predictions
+        if save_dir:
+            predictions.to_csv(os.path.join(save_dir,'predictions.csv'))
+            scores.to_csv(os.path.join(save_dir,'scores.csv'))
+        return predictions, scores 
 
     
     
