@@ -1,6 +1,7 @@
 import json
 import os
 import yaml
+from bs4 import BeautifulSoup
 
 # function to save a file
 def save_file(file_name, content):
@@ -17,6 +18,13 @@ def load_file(file_name):
     with open(file_name, 'r') as f:
         return f.read()
     
+def load_html(url,content_only=False):
+    html_text = load_file(url)
+    html_soup = BeautifulSoup(html_text, 'html.parser')
+    if content_only:
+        html_soup = html_soup.find('div',{'id':'content'})
+        html_text = html_soup.prettify()
+    return html_text, html_soup
 
 # Get all files within a directory
 def get_all_files(directory, file_type=None):
